@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package*.json ./
 
 RUN npm install --legacy-peer-deps
+RUN npx playwright install --with-deps chromium
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 COPY . .
 RUN npm run build
 

@@ -38,8 +38,8 @@ export class ScraperService {
     this.logger.log(' KKR Scraper (all pages via right-arrow, row-bound popup)');
 
     const browser = await chromium.launch({
-      headless: false, // watch it
-      slowMo: 100,
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
