@@ -1,4 +1,4 @@
-name:  Deploy KKR Scraper
+name:  Deploy KKR Scraper  
 on:
   push:
     branches: [ main ]
@@ -7,13 +7,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name:  Deploy via Tailscale
+    - name:  Deploy via Tailscale (EXACT like your SSH)
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.TAILSCALE_IP }}      # ← CHANGE TO THIS!
-        port: ${{ secrets.SSH_PORT }}         # 2222
-        username: ${{ secrets.SSH_USER }}     # sanket
-        password: ${{ secrets.SSH_PASSWORD }} # sanket ← ADD THIS SECRET!
+        host: novalink                    # ← EXACT like your ssh command!
+        port: 2222                        # ← Same port!
+        username: sanket                   # ← Same user!
+        password: ${{ secrets.SSH_PASSWORD }}  # sanket
         script: |
           echo " Restarting KKR scraper..."
           docker stop kkr-api kkr-mongo 2>/dev/null||true
@@ -22,4 +22,6 @@ jobs:
           docker network create kkr-net
           docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
           docker run -d --name kkr-api --network kkr-net --init --ipc=host --user pwuser --security-opt seccomp=unconfined -p 3001:3000 -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" mcr.microsoft.com/playwright:v1.58.0-noble sh -c "cd /home/pwuser&&git clone https://github.com/sanketnawale/kkr-app.git app&&cd app&&npm install --legacy-peer-deps&&npm run build&&npm run start:prod"
-          sleep 30 && curl -X POST http://localhost:3001/portfolio/scrape && echo " Deployed + Fresh scrape!"
+          sleep 60
+          curl -X POST http://localhost:3001/portfolio/scrape
+          echo " Deployed! http://100.72.149.70:3001/portfolio/stats"
