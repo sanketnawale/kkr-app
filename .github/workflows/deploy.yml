@@ -10,10 +10,10 @@ jobs:
     - name:  Deploy via Tailscale
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}      # 100.72.149.70
-        port: ${{ secrets.SSH_PORT }}        # 2222
-        username: ${{ secrets.SSH_USER }}    # sanket
-        password: ${{ secrets.SSH_PASSWORD }} # sanket
+        host: ${{ secrets.TAILSCALE_IP }}      # ← CHANGE TO THIS!
+        port: ${{ secrets.SSH_PORT }}         # 2222
+        username: ${{ secrets.SSH_USER }}     # sanket
+        password: ${{ secrets.SSH_PASSWORD }} # sanket ← ADD THIS SECRET!
         script: |
           echo " Restarting KKR scraper..."
           docker stop kkr-api kkr-mongo 2>/dev/null||true
