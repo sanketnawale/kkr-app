@@ -1,32 +1,47 @@
-- name: Deploy via SSH over Tailscale
-  uses: appleboy/ssh-action@v1.0.0
-  with:
-    host: 100.72.149.70
-    port: 2222
-    username: sanket
-    password: ${{ secrets.SSH_PASSWORD }}
-    script: |
-      echo " Restarting KKR scraper..."
-      docker stop kkr-api kkr-mongo 2>/dev/null || true
-      docker rm kkr-api kkr-mongo 2>/dev/null || true
-      docker network rm kkr-net 2>/dev/null || true
-      docker network create kkr-net
-      docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
-      
-      #  FIXED: Install browsers + run app
-      docker run -d --name kkr-api --network kkr-net --init --ipc=host \
-        --user pwuser --security-opt seccomp=unconfined \
-        -p 3001:3000 -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" \
-        mcr.microsoft.com/playwright:v1.58.0-noble \
-        sh -c "
-          cd /home/pwuser &&
-          git clone https://github.com/sanketnawale/kkr-app.git app &&
-          cd app &&
-          npm install --legacy-peer-deps &&
-          npx playwright install --with-deps &&
-          npm run build &&
-          npm run start:prod
-        "
-      sleep 30
-      curl -sSf -X POST http://localhost:3001/portfolio/scrape || echo "⏳ App still booting..."
-      echo " Deployed! Check: http://100.72.149.70:3001/portfolio/stats"
+name: Deploy KKR Scraper
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect runner to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Deploy via SSH over Tailscale
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 100.72.149.70
+          port: 2222
+          username: sanket
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            echo "🔄 Restarting KKR scraper..."
+            docker stop kkr-api kkr-mongo 2>/dev/null || true
+            docker rm kkr-api kkr-mongo 2>/dev/null || true
+            docker network rm kkr-net 2>/dev/null || true
+            docker network create kkr-net
+            docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
+            
+            # ✅ FIXED: Playwright browsers + production security
+            docker run -d --name kkr-api --network kkr-net --init --ipc=host \
+              --user pwuser --security-opt seccomp=unconfined \
+              -p 3001:3000 -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" \
+              mcr.microsoft.com/playwright:v1.58.0-noble \
+              sh -c "
+                cd /home/pwuser &&
+                git clone https://github.com/sanketnawale/kkr-app.git app &&
+                cd app &&
+                npm install --legacy-peer-deps &&
+                npx playwright install --with-deps &&
+                npm run build &&
+                npm run start:prod
+              "
+            sleep 45
+            curl -sSf -X POST http://localhost:3001/portfolio/scrape || echo "⏳ App booting (takes 60s)..."
+            echo "✅ Deployed! http://100.72.149.70:3001/portfolio/stats"
