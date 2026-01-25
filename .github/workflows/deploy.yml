@@ -1,19 +1,25 @@
-name: Deploy KKR Scraper
+name:  Deploy KKR Scraper
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: appleboy/ssh-action@v1.0.0
+    - name:  Deploy via Tailscale
+      uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SSH_USER }}
-        password: ${{ secrets.SSH_PASS }}
-        port: ${{ secrets.SSH_PORT }}
+        host: ${{ secrets.SERVER_HOST }}      # 100.72.149.70
+        port: ${{ secrets.SSH_PORT }}        # 2222
+        username: ${{ secrets.SSH_USER }}    # sanket
+        password: ${{ secrets.SSH_PASSWORD }} # sanket
         script: |
-          cd /opt/kkr-scraper || git clone https://github.com/sanketnawale/YOUR_REPO.git /opt/kkr-scraper
-          cd /opt/kkr-scraper
-          git pull
-          docker-compose -f docker-compose.prod.yml up -d --build
+          echo " Restarting KKR scraper..."
+          docker stop kkr-api kkr-mongo 2>/dev/null||true
+          docker rm kkr-api kkr-mongo 2>/dev/null||true
+          docker network rm kkr-net 2>/dev/null||true
+          docker network create kkr-net
+          docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
+          docker run -d --name kkr-api --network kkr-net --init --ipc=host --user pwuser --security-opt seccomp=unconfined -p 3001:3000 -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" mcr.microsoft.com/playwright:v1.58.0-noble sh -c "cd /home/pwuser&&git clone https://github.com/sanketnawale/kkr-app.git app&&cd app&&npm install --legacy-peer-deps&&npm run build&&npm run start:prod"
+          sleep 30 && curl -X POST http://localhost:3001/portfolio/scrape && echo " Deployed + Fresh scrape!"
