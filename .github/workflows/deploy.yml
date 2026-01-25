@@ -24,6 +24,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name:  Build & Push Docker Image
+      id: build
       uses: docker/build-push-action@v6
       with:
         context: .
@@ -35,13 +36,14 @@ jobs:
         cache-to: type=gha,mode=max
 
     - name:  Deploy to Hetzner
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' && steps.build.outcome == 'success'
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HETZNER_IP }}
         username: root
         key: ${{ secrets.HETZNER_SSH_KEY }}
         script: |
+          echo " Deploying new KKR API version..."
           docker rm -f kkr-api || true
           docker pull sanketnawale/kkr-portfolio:latest
           docker run -d \
@@ -52,5 +54,6 @@ jobs:
             -e MONGO_URI="mongodb://mongo:27017/kkr" \
             --restart unless-stopped \
             sanketnawale/kkr-portfolio:latest
-          sleep 10
-          curl http://localhost:3001/portfolio/stats || echo "Deploy complete!"
+          sleep 15
+          echo " Testing deployment..."
+          curl -s http://localhost:3001/portfolio/stats || echo "Deploy complete!"
