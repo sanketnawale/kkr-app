@@ -4,6 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { ScraperModule } from './scraper/scraper.module';
 import databaseConfig from './config/database.config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ScraperScheduler } from './scheduler/scraper.scheduler';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -18,8 +21,11 @@ import databaseConfig from './config/database.config';
       }),
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),        
+    HttpModule,                      
     ScraperModule,
     PortfolioModule,
   ],
+  providers: [ScraperScheduler],
 })
 export class AppModule {}
