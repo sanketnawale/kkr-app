@@ -9,7 +9,7 @@ export class ScraperScheduler {
 
   constructor(private readonly httpService: HttpService) {}
 
-  @Cron('18 1 * * *', { timeZone: 'Europe/Rome' }) // 1:15 AM Rome time DAILY
+  @Cron('56 1 * * *', { timeZone: 'Europe/Rome' }) // 1:15 AM Rome time DAILY
   async handleDailyScrape() {
     this.logger.log('🌙 Starting DAILY KKR scrape at 1:15 AM...');
     
