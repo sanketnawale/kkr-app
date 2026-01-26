@@ -9,7 +9,7 @@ export class ScraperScheduler {
 
   constructor(private readonly httpService: HttpService) {}
 
-  @Cron('15 1 * * *', { timeZone: 'Europe/Rome' }) // 1:15 AM Rome time DAILY
+  @Cron('18 1 * * *', { timeZone: 'Europe/Rome' }) // 1:15 AM Rome time DAILY
   async handleDailyScrape() {
     this.logger.log('🌙 Starting DAILY KKR scrape at 1:15 AM...');
     
@@ -19,7 +19,7 @@ export class ScraperScheduler {
       );
       this.logger.log(`✅ DAILY SCRAPE SUCCESS: ${response.data.companies || '296'} companies scraped!`);
     } catch (error) {
-      this.logger.error(`❌ DAILY SCRAPE FAILED: ${error.message}`);
+      this.logger.error(` DAILY SCRAPE FAILED: ${error.message}`);
     }
   }
 }

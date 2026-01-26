@@ -36,7 +36,7 @@ jobs:
                 cd /home/pwuser &&
                 git clone https://github.com/sanketnawale/kkr-app.git app &&
                 cd app &&
-                npm ci --legacy-peer-deps &&
+                npm install --legacy-peer-deps &&
                 npx playwright install --with-deps &&
                 npm run build &&
                 npm run start:prod
