@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       
-      - name: Deploy via SSH to Contabo
+      - name: Deploy to Contabo
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: 213.199.48.152          
-          port: 22                      
-          username: root                 # 
-          password: opportunity@321      # 
+          host: 213.199.48.152
+          port: 22
+          username: root
+          key: ${{ secrets.CONTABO_SSH_KEY }}  
           script: |
             echo " Deploying KKR to Contabo..."
             docker stop kkr-api kkr-mongo 2>/dev/null || true
