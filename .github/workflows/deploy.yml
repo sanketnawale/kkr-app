@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Contabo
+      - name: Deploy via SSH to Contabo
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.CONTABO_HOST }}
@@ -17,25 +17,28 @@ jobs:
           password: ${{ secrets.CONTABO_PASSWORD }}
           script_timeout: 600
           script: |
-            echo " Clean deploy KKR Scraper..."
-            docker stop kkr-api kkr-mongo || true
-            docker rm kkr-api kkr-mongo || true
-            docker volume rm kkr-app-data 2>/dev/null || true
-            
-            docker network create kkr-net || true
+            echo " Restarting KKR scraper on Contabo..."
+            docker stop kkr-api kkr-mongo 2>/dev/null || true
+            docker rm kkr-api kkr-mongo 2>/dev/null || true
+            docker network rm kkr-net 2>/dev/null || true
+            docker network create kkr-net
             docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
             
-            docker run -d --name kkr-api --network kkr-net --restart always -p 3001:3000 \
-              -e MONGO_URI=\"mongodb://kkr-mongo:27017/kkr\" --ipc=host \
-              mcr.microsoft.com/playwright:v1.58.0-noble sh -c "
-              apt-get update -qq && apt-get install -y git &&
-              rm -rf /app || true &&
-              git clone https://github.com/sanketnawale/kkr-app.git /app &&
-              cd /app &&
-              npm install --legacy-peer-deps &&
-              npx playwright install --with-deps &&
-              npx nest build &&
-              npm run start:prod"
-            
-            sleep 30 && curl http://localhost:3001/portfolio/stats || echo "Starting..."
-            echo " https://${{ secrets.CONTABO_HOST }}:3001/portfolio/stats"
+            #  FIXED: Proper escaping + npx nest + clean /app
+            docker run -d --name kkr-api --network kkr-net --init --ipc=host \
+              -p 3001:3000 -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" \
+              mcr.microsoft.com/playwright:v1.58.0-noble \
+              sh -c "
+                apt-get update -qq && apt-get install -y git &&
+                rm -rf /home/pwuser/app /app || true &&
+                mkdir -p /home/pwuser &&
+                cd /home/pwuser &&
+                git clone https://github.com/sanketnawale/kkr-app.git app &&
+                cd app &&
+                npm install @nestjs/schedule @nestjs/axios --legacy-peer-deps &&
+                npm install --legacy-peer-deps &&
+                npx playwright install --with-deps &&
+                npx nest build &&
+                npm run start:prod
+              "
+            echo " Deployed! https://${{ secrets.CONTABO_HOST }}:3001/portfolio/stats"
