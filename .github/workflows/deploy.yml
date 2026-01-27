@@ -8,40 +8,31 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Contabo
+      - name: Deploy to Contabo (5min timeout)
         uses: appleboy/ssh-action@v1.0.3
+        timeout-minutes: 10
         with:
-          host: ${{ secrets.SERVER_IP }}    
-          port: ${{ secrets.SSH_PORT }}      
-          username: ${{ secrets.SSH_USER }}  
-          password: ${{ secrets.SSH_PASSWORD }}  
+          host: ${{ secrets.SERVER_IP }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script_timeout: 300   # 5 minutes
+          script_stop: true
           script: |
-            echo " Deploying KKR Scraper to Contabo..."
-            
-            # Cleanup old containers
-            docker stop kkr-api kkr-mongo 2>/dev/null || true
-            docker rm kkr-api kkr-mongo 2>/dev/null || true
-            docker network rm kkr-net 2>/dev/null || true
-            
-            # Create network + MongoDB
+            echo " Deploying KKR Scraper..."
+            docker stop kkr-api kkr-mongo || true
+            docker rm kkr-api kkr-mongo || true
+            docker network rm kkr-net || true
             docker network create kkr-net
-            docker run -d --name kkr-mongo --network kkr-net \
-              -p 27017:27017 -v kkr-data:/data/db mongo:latest
+            docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
             
-            # FIXED KKR API (working manual command)
-            docker run -d --name kkr-api --network kkr-net --restart always \
-              -p 3001:3000 -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" \
-              mcr.microsoft.com/playwright:v1.58.0-noble \
-              sh -c "
-                apt-get update && 
-                apt-get install -y git &&
-                git clone https://github.com/sanketnawale/kkr-app.git /app &&
-                cd /app &&
-                npm install @nestjs/schedule @nestjs/axios --legacy-peer-deps &&
-                npm install --legacy-peer-deps &&
-                npx playwright install --with-deps &&
-                npm run build &&
-                npm run start:prod
-              "
+            docker run -d --name kkr-api --network kkr-net --restart always -p 3001:3000 \
+              -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" \
+              mcr.microsoft.com/playwright:v1.58.0-noble sh -c "
+              apt-get update -qq && apt-get install -y git &&
+              git clone https://github.com/sanketnawale/kkr-app.git /app &&
+              cd /app && npm ci --legacy-peer-deps &&
+              npx playwright install --with-deps &&
+              npm run build && npm run start:prod"
             
-            echo "KKR Scraper deployed! Check: https://${{ secrets.SERVER_IP }}:3001/portfolio/stats"
+            echo " Deployed! curl http://localhost:3001/portfolio/stats"
