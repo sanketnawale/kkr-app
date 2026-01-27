@@ -12,6 +12,8 @@ export interface ScrapedCompany {
   website?: string;
   year?: number;
   logoUrl?: string;
+  lastScraped?: Date; 
+  sourceKey?: string;
 }
 
 @Injectable()
@@ -120,7 +122,17 @@ export class ScraperService {
           await this.closeDetails(page, row);
         }
 
-        companies.push({ name, assetClass, industry, region, ...details });
+        const sourceKey = `kkr:${name.toLowerCase().replace(/\s+/g, '-')}`;
+        companies.push({ 
+          name, 
+          assetClass, 
+          industry, 
+          region, 
+          ...details,
+          sourceKey,                    // ← NEW!
+          lastScraped: new Date()       // ← NEW! Fresh every scrape
+        });
+
 
         this.logger.log(` ${i + 1}/${totalRows} ${name} | ${assetClass}`);
       } catch (err: any) {
