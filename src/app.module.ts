@@ -7,6 +7,9 @@ import databaseConfig from './config/database.config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ScraperScheduler } from './scheduler/scraper.scheduler';
 import { HttpModule } from '@nestjs/axios';
+import { TelegramBotService } from './bot/telegram-bot.service';
+import { PortfolioService } from './portfolio/portfolio.service';
+
 
 @Module({
   imports: [
@@ -26,6 +29,6 @@ import { HttpModule } from '@nestjs/axios';
     ScraperModule,
     PortfolioModule,
   ],
-  providers: [ScraperScheduler],
+  providers: [ScraperScheduler, TelegramBotService, PortfolioService],
 })
 export class AppModule {}

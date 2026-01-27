@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { chromium, Locator, Page } from 'playwright';
 import { ConfigService } from '@nestjs/config';
+import { TelegramBotService } from '../bot/telegram-bot.service';
 
 export interface ScrapedCompany {
   name: string;
@@ -24,7 +25,7 @@ export class ScraperService {
   // Prevent concurrent scrapes (Swagger/Postman double-click, retries, etc.)
   private isRunning = false;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService, private telegramBotService: TelegramBotService) {
     this.kkrUrl =
       this.configService.get<string>('KKR_URL') ||
       'https://www.kkr.com/invest/portfolio';
