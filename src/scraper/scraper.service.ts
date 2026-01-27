@@ -25,7 +25,7 @@ export class ScraperService {
   // Prevent concurrent scrapes (Swagger/Postman double-click, retries, etc.)
   private isRunning = false;
 
-  constructor(private readonly configService: ConfigService, private telegramBotService: TelegramBotService) {
+  constructor(private readonly configService: ConfigService) {
     this.kkrUrl =
       this.configService.get<string>('KKR_URL') ||
       'https://www.kkr.com/invest/portfolio';
