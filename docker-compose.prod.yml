@@ -25,9 +25,9 @@ services:
         npm run start:prod
       "
     environment:
-      - MONGO_URI=mongodb://kkr-mongo:27017/kkr
-      - GIT_REPO=https://github.com/sanketnawale/kkr-app.git
-      - TG_BOT_TOKEN=8279844622:AAHcv8MlPiSV7SdZAn_kxbOeybQeIYiBeCs  
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://kkr-mongo:27017/kkr
+      - TG_BOT_TOKEN=8279844622:AAHcv8MlPiSV7SdZAn_kxbOeybQeIYiBeCs
       - ADMIN_CHAT_ID=7821206516                                    
     ports:
       - "3001:3000"
