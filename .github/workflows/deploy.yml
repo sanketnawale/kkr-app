@@ -12,10 +12,10 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         timeout-minutes: 10
         with:
-          host: ${{ secrets.SERVER_IP }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          host: ${{ secrets.CONTABO_HOST }}
+          port: ${{ secrets.CONTABO_PORT}}
+          username: ${{ secrets.CONTABO_USER }}
+          password: ${{ secrets.CONTABO_PASSWORD }}
           script_timeout: 300   # 5 minutes
           script_stop: true
           script: |
