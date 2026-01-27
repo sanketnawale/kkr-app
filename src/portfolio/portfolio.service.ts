@@ -39,6 +39,7 @@ export class PortfolioService {
             year: company.year,
             logoUrl: company.logoUrl,
             updatedAt: new Date(),
+            
           },
           $setOnInsert: { createdAt: new Date() },
         },
