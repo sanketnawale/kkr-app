@@ -8,31 +8,34 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Contabo (5min timeout)
+      - name: Deploy to Contabo
         uses: appleboy/ssh-action@v1.0.3
-        timeout-minutes: 10
         with:
           host: ${{ secrets.CONTABO_HOST }}
-          port: ${{ secrets.CONTABO_PORT}}
+          port: ${{ secrets.CONTABO_PORT }}
           username: ${{ secrets.CONTABO_USER }}
           password: ${{ secrets.CONTABO_PASSWORD }}
-          script_timeout: 300   # 5 minutes
-          script_stop: true
+          script_timeout: 600
           script: |
-            echo " Deploying KKR Scraper..."
+            echo " Clean deploy KKR Scraper..."
             docker stop kkr-api kkr-mongo || true
             docker rm kkr-api kkr-mongo || true
-            docker network rm kkr-net || true
-            docker network create kkr-net
+            docker volume rm kkr-app-data 2>/dev/null || true
+            
+            docker network create kkr-net || true
             docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
             
             docker run -d --name kkr-api --network kkr-net --restart always -p 3001:3000 \
-              -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" \
+              -e MONGO_URI=\"mongodb://kkr-mongo:27017/kkr\" --ipc=host \
               mcr.microsoft.com/playwright:v1.58.0-noble sh -c "
               apt-get update -qq && apt-get install -y git &&
+              rm -rf /app || true &&
               git clone https://github.com/sanketnawale/kkr-app.git /app &&
-              cd /app && npm ci --legacy-peer-deps &&
+              cd /app &&
+              npm install --legacy-peer-deps &&
               npx playwright install --with-deps &&
-              npm run build && npm run start:prod"
+              npx nest build &&
+              npm run start:prod"
             
-            echo " Deployed! curl http://localhost:3001/portfolio/stats"
+            sleep 30 && curl http://localhost:3001/portfolio/stats || echo "Starting..."
+            echo " https://${{ secrets.CONTABO_HOST }}:3001/portfolio/stats"
