@@ -28,9 +28,7 @@ services:
       - MONGO_URI=mongodb://kkr-mongo:27017/kkr
       - GIT_REPO=https://github.com/sanketnawale/kkr-app.git
       - TG_BOT_TOKEN=8279844622:AAHcv8MlPiSV7SdZAn_kxbOeybQeIYiBeCs  
-      - ADMIN_CHAT_ID=7821206516  
-    env_file:     
-      - .env                                   
+      - ADMIN_CHAT_ID=7821206516                                    
     ports:
       - "3001:3000"
     networks:
