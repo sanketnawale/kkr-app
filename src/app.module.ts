@@ -29,6 +29,6 @@ import { PortfolioService } from './portfolio/portfolio.service';
     ScraperModule,
     PortfolioModule,
   ],
-  providers: [ScraperScheduler, TelegramBotService, PortfolioService],
+  providers: [ScraperScheduler, TelegramBotService],
 })
 export class AppModule {}
