@@ -15,4 +15,5 @@ COPY package*.json ./
 RUN npm install --only=production --legacy-peer-deps --no-package-lock
 COPY --from=builder /app/dist ./dist
 EXPOSE 3000
+COPY .env .env 
 CMD ["npm", "run", "start:prod"]

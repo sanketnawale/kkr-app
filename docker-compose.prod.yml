@@ -25,7 +25,7 @@ services:
         npm run start:prod
       "
     volumes:
-      - .env:/host.env:ro  # ← MOUNT YOUR .env!
+      - .env:/host.env:ro
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://kkr-mongo:27017/kkr
