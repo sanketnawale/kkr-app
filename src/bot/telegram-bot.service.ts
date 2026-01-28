@@ -36,7 +36,7 @@ export class TelegramBotService {
 /raw -  Raw JSON stats
 /help -  This message
 
-*Live API:* http://213.199.48.152:3000/portfolio/stats
+*Live API:* http://213.199.48.152:3001/portfolio/stats
       `, { parse_mode: 'Markdown' });
     });
 
