@@ -7,7 +7,7 @@ export class TelegramBotService {
   private bot: TelegramBot;
 
   constructor() {
-    // 🔥 HARDCODE - NO ENV NEEDED!
+    
     const token = '8279844622:AAHcv8MlPiSV7SdZAn_kxbOeybQeIYiBeCs';
     const adminChatId = '7821206516';
     
@@ -26,15 +26,15 @@ export class TelegramBotService {
     this.bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
       this.bot.sendMessage(chatId, `
-*🤖 KKR Portfolio Bot*
+* KKR Portfolio Bot*
 
 *Commands:*
-/stats - 📊 Portfolio statistics
-/companies - 📋 List companies  
-/companies Europe - 🌍 Filter by region
-/scrape - 🔄 Fresh scrape (~5min!)
-/raw - 💾 Raw JSON stats
-/help - 📖 This message
+/stats -  Portfolio statistics
+/companies -  List companies  
+/companies Europe -  Filter by region
+/scrape -  Fresh scrape (~5min!)
+/raw -  Raw JSON stats
+/help -  This message
 
 *Live API:* http://213.199.48.152:3000/portfolio/stats
       `, { parse_mode: 'Markdown' });
@@ -54,7 +54,12 @@ export class TelegramBotService {
     // /scrape
     this.bot.onText(/\/scrape/, async (msg) => {
       const chatId = msg.chat.id;
-      await this.bot.sendMessage(chatId, '🚀 Starting fresh KKR scrape... (~5 mins)');
+      const ADMINS = ['7821206516'];
+      const userId = msg.from?.id?.toString();
+      if (!userId || !ADMINS.includes(userId)) {
+        return this.bot.sendMessage(chatId, ' *Admin only!*');
+     }
+      await this.bot.sendMessage(chatId, ' Starting fresh KKR scrape... ');
       
       try {
         const response = await fetch('http://localhost:3000/portfolio/scrape', {
@@ -63,7 +68,7 @@ export class TelegramBotService {
         await this.bot.sendMessage(chatId, '✅ Scrape triggered! Check /stats later');
         await this.notifyAdmin('🔄 Scrape started by user');
       } catch (error) {
-        await this.bot.sendMessage(chatId, `❌ Scrape failed: ${error.message}`);
+        await this.bot.sendMessage(chatId, ` Scrape failed: ${error.message}`);
       }
     });
 
@@ -81,7 +86,7 @@ export class TelegramBotService {
         const companies = await response.json();
         
         if (companies.length === 0) {
-          return this.bot.sendMessage(chatId, '❌ No companies found');
+          return this.bot.sendMessage(chatId, ' No companies found');
         }
 
         const text = companies.map((c, i) => 
@@ -93,11 +98,11 @@ export class TelegramBotService {
           disable_web_page_preview: true 
         });
       } catch (error) {
-        await this.bot.sendMessage(chatId, `❌ Error: ${error.message}`);
+        await this.bot.sendMessage(chatId, ` Error: ${error.message}`);
       }
     });
 
-    // /raw - Full JSON
+    
     this.bot.onText(/\/raw/, async (msg) => {
       const chatId = msg.chat.id;
       try {
@@ -107,7 +112,7 @@ export class TelegramBotService {
         const jsonText = `\`\`\`json\n${JSON.stringify(stats, null, 2)}\n\`\`\``;
         await this.bot.sendMessage(chatId, jsonText, { parse_mode: 'Markdown' });
       } catch (error) {
-        await this.bot.sendMessage(chatId, `❌ Raw stats error: ${error.message}`);
+        await this.bot.sendMessage(chatId, ` Raw stats error: ${error.message}`);
       }
     });
   }
@@ -123,7 +128,7 @@ export class TelegramBotService {
       const topRegion = stats.byRegion[0];
       
       const text = `
-*📊 KKR Portfolio LIVE Stats*
+* KKR Portfolio LIVE Stats*
 
 *Total:* ${stats.total} companies
 *Private Equity:* ${peCount}
@@ -137,29 +142,29 @@ ${stats.byAssetClass.slice(0, 5).map((c: any) => `• ${c._id}: ${c.count}`).joi
       
       await this.bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
     } catch (error) {
-      await this.bot.sendMessage(chatId, `❌ Stats error: ${error.message}`);
+      await this.bot.sendMessage(chatId, ` Stats error: ${error.message}`);
     }
   }
 
   private getHelpText() {
     return `
-*🤖 KKR Portfolio Bot Commands*
+* KKR Portfolio Bot Commands*
 
 /start - Welcome message
-/stats - 📊 Portfolio statistics  
-/companies - 📋 List companies (top 10)
-/companies Europe - 🌍 Filter by region
-/scrape - 🔄 Trigger fresh scrape (~5min)
-/raw - 💾 Raw JSON stats
+/stats -  Portfolio statistics  
+/companies -  List companies (top 10)
+/companies Europe -  Filter by region
+/scrape -  Trigger fresh scrape (~5min)
+/raw -  Raw JSON stats
 /help - Show this help
 
 *Live API:* http://213.199.48.152:3000/portfolio/stats
     `;
   }
 
-  // Send scraper notifications
+  
   async notifyAdmin(text: string) {
-    const adminChatId = '7821206516';  // 🔥 HARDCODED!
+    const adminChatId = '7821206516';  
     if (adminChatId && this.bot) {
       await this.bot.sendMessage(parseInt(adminChatId), text);
     }
