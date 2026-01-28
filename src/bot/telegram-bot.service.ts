@@ -15,7 +15,7 @@ export class TelegramBotService {
 
     this.bot = new TelegramBot(token, { polling: true });
     this.setupCommands();
-    this.logger.log('✅ Telegram bot started! t.me/My_kkrbot');
+    this.logger.log(' Telegram bot started! t.me/My_kkrbot');
   }
 
   private setupCommands() {
@@ -103,14 +103,14 @@ export class TelegramBotService {
         const jsonText = `\`\`\`json\n${JSON.stringify(stats, null, 2)}\n\`\`\``;
         await this.bot.sendMessage(chatId, jsonText, { parse_mode: 'Markdown' });
       } catch (error) {
-        await this.bot.sendMessage(chatId, `❌ Raw stats error: ${error.message}`);
+        await this.bot.sendMessage(chatId, ` Raw stats error: ${error.message}`);
       }
     });
   }
 
   private async sendStats(chatId: number) {
     try {
-      this.bot.sendMessage(chatId, '📊 Fetching stats...');
+      this.bot.sendMessage(chatId, ' Fetching stats...');
       
       const response = await fetch('http://213.199.48.152:3001/portfolio/stats');
       const stats = await response.json();
@@ -133,7 +133,7 @@ ${stats.byAssetClass.slice(0, 5).map((c: any) => `• ${c._id}: ${c.count}`).joi
       
       await this.bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
     } catch (error) {
-      await this.bot.sendMessage(chatId, `❌ Stats error: ${error.message}`);
+      await this.bot.sendMessage(chatId, ` Stats error: ${error.message}`);
     }
   }
 
@@ -142,11 +142,11 @@ ${stats.byAssetClass.slice(0, 5).map((c: any) => `• ${c._id}: ${c.count}`).joi
  *KKR Portfolio Bot Commands*
 
 /start - Welcome message
-/stats - 📊 Portfolio statistics  
-/companies - 📋 List companies (top 10)
+/stats -  Portfolio statistics  
+/companies -  List companies (top 10)
 /companies Europe - Filter by region
-/scrape - 🔄 Trigger fresh scrape (~7min)
-/raw - 💾 Raw JSON stats
+/scrape -  Trigger fresh scrape (~7min)
+/raw -  Raw JSON stats
 /help - Show this help
 
 *Live API endpoints:*

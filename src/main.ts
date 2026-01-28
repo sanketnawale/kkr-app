@@ -6,6 +6,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
   
+  logger.log('🚨 ENV DEBUG:', {
+    TG_BOT_TOKEN: !!process.env.TG_BOT_TOKEN ? 'SET ✅' : 'MISSING ❌',
+    MONGODB_URI: !!process.env.MONGODB_URI ? 'SET ✅' : 'MISSING ❌',
+    PORT: process.env.PORT || 3000
+  });
   app.enableCors();
   
   const port = process.env.PORT || 3000;
@@ -16,4 +21,5 @@ async function bootstrap() {
   logger.log(`📋 Companies endpoint: GET http://localhost:${port}/portfolio/companies`);
   logger.log(`📈 Stats endpoint: GET http://localhost:${port}/portfolio/stats`);
 }
+
 bootstrap();
