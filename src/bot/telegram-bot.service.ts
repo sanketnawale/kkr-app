@@ -61,7 +61,7 @@ export class TelegramBotService {
           method: 'POST'
         });
         await this.bot.sendMessage(chatId, '✅ Scrape triggered! Check /stats later');
-        await this.notifyAdmin(adminChatId, '🔄 Scrape started by user');
+        await this.notifyAdmin('🔄 Scrape started by user');
       } catch (error) {
         await this.bot.sendMessage(chatId, `❌ Scrape failed: ${error.message}`);
       }
