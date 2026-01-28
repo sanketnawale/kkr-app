@@ -158,7 +158,7 @@ ${stats.byAssetClass.slice(0, 5).map((c: any) => `• ${c._id}: ${c.count}`).joi
 /raw -  Raw JSON stats
 /help - Show this help
 
-*Live API:* http://213.199.48.152:3000/portfolio/stats
+*Live API:* http://213.199.48.152:3001/portfolio/stats
     `;
   }
 
