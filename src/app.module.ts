@@ -15,6 +15,7 @@ import { PortfolioService } from './portfolio/portfolio.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
       load: [databaseConfig],
     }),
     MongooseModule.forRootAsync({
