@@ -4,10 +4,12 @@ services:
   kkr-mongo:
     image: mongo:latest
     container_name: kkr-mongo
-    ports:
-      - "27017:27017"
     volumes:
       - kkr-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=SuperSecureAdminPass123!
+    command: ["mongod", "--auth", "--bind_ip_all"]
     restart: unless-stopped
     networks:
       - kkr-net
@@ -28,7 +30,7 @@ services:
       - .env:/host.env:ro
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://kkr-mongo:27017/kkr
+      - MONGODB_URI=mongodb://sanket:fantacy@321@kkr-mongo:27017/kkr?authSource=kkr
       - TG_BOT_TOKEN=8279844622:AAHcv8MlPiSV7SdZAn_kxbOeybQeIYiBeCs
       - ADMIN_CHAT_ID=7821206516                                    
     ports:
