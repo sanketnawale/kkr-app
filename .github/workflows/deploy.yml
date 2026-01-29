@@ -17,16 +17,13 @@ jobs:
           password: ${{ secrets.CONTABO_PASSWORD }}
           script_timeout: 600
           script: |
-            echo " Restarting KKR scraper on Contabo..."
-            docker stop kkr-api kkr-mongo 2>/dev/null || true
-            docker rm kkr-api kkr-mongo 2>/dev/null || true
-            docker network rm kkr-net 2>/dev/null || true
-            docker network create kkr-net
-            docker run -d --name kkr-mongo --network kkr-net -p 27017:27017 -v kkr-data:/data/db mongo:latest
+            echo " Deploying KKR scraper with MongoDB Atlas..."
+            docker stop kkr-api 2>/dev/null || true
+            docker rm kkr-api 2>/dev/null || true
             
-            #  FIXED: Proper escaping + npx nest + clean /app
-            docker run -d --name kkr-api --network kkr-net --init --ipc=host \
-              -p 3001:3000 -e MONGO_URI="mongodb://kkr-mongo:27017/kkr" \
+            docker run -d --name kkr-api --init --ipc=host \
+              -p 3001:3000 \
+              -e MONGODB_URI="mongodb+srv://sanketnawale101_db_user:Fantacy@321@cluster.uentncd.mongodb.net/kkr?retryWrites=true&w=majority" \
               mcr.microsoft.com/playwright:v1.58.0-noble \
               sh -c "
                 apt-get update -qq && apt-get install -y git &&
