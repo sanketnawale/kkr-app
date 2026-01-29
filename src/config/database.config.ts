@@ -1,9 +1,18 @@
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('database', () => ({
-  uri: process.env.MONGO_URI || 'mongodb://localhost:27017/kkr',
-  options: {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-}));
+export default registerAs('database', () => {
+  // ✅ FIXED: Use MONGODB_URI + NO LOCALHOST FALLBACK
+  const uri = process.env.MONGODB_URI;
+  
+  if (!uri) {
+    throw new Error('🚨 MONGODB_URI environment variable REQUIRED for production');
+  }
+  
+  return {
+    uri,
+    options: {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+  };
+});
