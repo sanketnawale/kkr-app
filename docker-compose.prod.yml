@@ -30,7 +30,7 @@ services:
       - .env:/host.env:ro
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://sanket:fantacy@321@kkr-mongo:27017/kkr?authSource=kkr
+      - MONGODB_URI=mongodb+srv://sanketnawale101_db_user:Fantacy@321@cluster.uentncd.mongodb.net/kkr?retryWrites=true&w=majority
       - TG_BOT_TOKEN=8279844622:AAHcv8MlPiSV7SdZAn_kxbOeybQeIYiBeCs
       - ADMIN_CHAT_ID=7821206516                                    
     ports:
